@@ -16,9 +16,15 @@ public class SwiftBackgroundLocationPlugin: NSObject, FlutterPlugin, CLLocationM
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         SwiftBackgroundLocationPlugin.locationManager = CLLocationManager()
-        SwiftBackgroundLocationPlugin.locationManager.showsBackgroundLocationIndicator = false
-        SwiftBackgroundLocationPlugin.locationManager?.delegate = self
-        SwiftBackgroundLocationPlugin.locationManager?.requestAlwaysAuthorization()
+        if let locationManager = SwiftBackgroundLocationPlugin.locationManager {
+            locationManager.showsBackgroundLocationIndicator = false
+            locationManager.delegate = self
+            locationManager.requestAlwaysAuthorization()
+        } else {
+            // Handle the case where locationManager is nil
+            result(FlutterError(code: "LOCATION_MANAGER_ERROR", message: "CLLocationManager is nil", details: nil))
+            return
+        }
 
         SwiftBackgroundLocationPlugin.locationManager?.allowsBackgroundLocationUpdates = true
         if #available(iOS 11.0, *) {
