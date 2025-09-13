@@ -5,6 +5,7 @@ import io.flutter.plugin.common.MethodChannel
 
 import io.flutter.plugin.common.BinaryMessenger
 import android.app.Activity
+import android.app.ActivityManager
 import android.content.*
 import android.content.pm.PackageManager
 import android.location.Location
@@ -13,6 +14,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 
@@ -114,6 +116,19 @@ class BackgroundLocationService: MethodChannel.MethodCallHandler, PluginRegistry
         return 0
     }
 
+    private fun isLocationServiceRunning(): Boolean {
+        val manager: ActivityManager = context!!.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        for (service in manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (LocationUpdatesService::class.java.getName() == service.service.getClassName()) {
+                if (service.foreground)
+                    return true
+                else
+                    return false
+            }
+        }
+        return false
+    }
+
     private fun stopLocationService(): Int {
         service?.removeLocationUpdates()
         LocalBroadcastManager.getInstance(context!!).unregisterReceiver(receiver!!)
@@ -151,6 +166,7 @@ class BackgroundLocationService: MethodChannel.MethodCallHandler, PluginRegistry
         when (call.method) {
             "stop_location_service" -> result.success(stopLocationService())
             "start_location_service" -> result.success(startLocationService(call.argument("distance_filter"), call.argument("force_location_manager")))
+            "is_service_running" -> result.success(isLocationServiceRunning())
             "set_android_notification" -> result.success(setAndroidNotification(call.argument("title"),call.argument("message"),call.argument("icon")))
             "set_configuration" -> result.success(setConfiguration(call.argument<String>("interval")?.toLongOrNull()))
             else -> result.notImplemented()
