@@ -1,31 +1,19 @@
 package com.almoullim.background_location
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
-import io.flutter.plugin.common.PluginRegistry.Registrar
 import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
-import io.flutter.plugin.common.PluginRegistry
-
 
 class BackgroundLocationPlugin : FlutterPlugin, ActivityAware {
 
     companion object {
-
-        /**
-        Legacy for v1 embedding
-         */
-        @SuppressWarnings("deprecation")
-        fun registerWith(registrar: PluginRegistry.Registrar) {
-            val service = BackgroundLocationService.getInstance()
-            service.onAttachedToEngine(registrar.context(), registrar.messenger())
-            registrar.addRequestPermissionsResultListener(service)
-        }
-
         const val TAG = "com.almoullim.Log.Tag"
         const val PLUGIN_ID = "com.almoullim.background_location"
     }
 
+    // Remove the entire registerWith function - you don't need it
+    // for modern Flutter v2 embedding
 
     override fun onAttachedToEngine(binding: FlutterPluginBinding) {
         BackgroundLocationService.getInstance().onAttachedToEngine(binding.applicationContext, binding.binaryMessenger)
@@ -52,5 +40,4 @@ class BackgroundLocationPlugin : FlutterPlugin, ActivityAware {
     override fun onDetachedFromActivity() {
         BackgroundLocationService.getInstance().setActivity(null)
     }
-
 }
